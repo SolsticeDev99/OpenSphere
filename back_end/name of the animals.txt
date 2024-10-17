@@ -1,0 +1,17 @@
+Elephant
+Flamingo
+Gorilla
+Hippopotamus 
+Koala
+Leopard
+Lion
+Octopus
+Orangutan
+Panda
+Penguin
+Rhinoceros
+Shark
+Tiger
+Wale
+Turtle
+Dolphin
