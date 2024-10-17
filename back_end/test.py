@@ -47,3 +47,5 @@ np.save("training_images.npy", training_images)
 np.save("training_labels.npy", training_labels)
 
 print(f"Loaded {len(training_images)} images and labels.")
+
+print('test')
