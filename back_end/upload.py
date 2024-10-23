@@ -1,5 +1,3 @@
-# from serpapi import GoogleSearch
-import pyrebase
 from connection import connect
 import requests
 
