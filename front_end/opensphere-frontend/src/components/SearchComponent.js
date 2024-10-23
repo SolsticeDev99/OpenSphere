@@ -3,77 +3,71 @@ import axios from 'axios';
 
 const SearchComponent = () => {
     const [query, setQuery] = useState('');
-    const [results, setResults] = useState([]);
+    const [result, setResult] = useState('');
     const [error, setError] = useState('');
-    const [wikiContent, setWikiContent] = useState('');
 
     const handleSearch = async () => {
         if (!query) return;
 
         setError(''); // Clear any previous errors
+        setResult(''); // Clear previous result
+
         try {
-            // Fetch data from DuckDuckGo
-            const duckDuckGoResponse = await axios.get('https://api.duckduckgo.com/', {
-                params: {
-                    q: query,
-                    format: 'json',
-                },
-            });
-
-            if (duckDuckGoResponse.data) {
-                const abstract = duckDuckGoResponse.data.AbstractText || 'No abstract available.';
-                setResults([{ title: query, abstract }]);
-            }
-
-            // Fetch full Wikipedia content
+            // Fetch the full Wikipedia content for the specified animal
+            const animal = query.split(' ')[0]; // Get the first word as the animal name
             const wikiResponse = await axios.get('https://en.wikipedia.org/w/api.php', {
                 params: {
                     action: 'query',
                     prop: 'extracts',
                     explaintext: true,
-                    titles: query,
+                    titles: animal,
                     format: 'json',
+                    origin: '*', // Allow CORS
                 },
             });
 
             const wikiPages = wikiResponse.data.query.pages;
             const page = Object.values(wikiPages)[0]; // Get the first (and only) page
+
             if (page.extract) {
-                setWikiContent(page.title + ': ' + page.extract);
+                const sectionData = extractSection(page.extract, query);
+                setResult(sectionData);
             } else {
-                setWikiContent('No content found.');
+                setResult('No content found for this query.');
             }
         } catch (err) {
             setError('Error fetching data: ' + err.message);
         }
     };
 
+    const extractSection = (text, keyword) => {
+        const normalizedKeyword = keyword.toLowerCase();
+        const sections = text.split(/\n{2,}/); // Split by two or more newlines
+        const relevantSections = sections.filter(section => section.toLowerCase().includes(normalizedKeyword));
+
+        if (relevantSections.length > 0) {
+            return relevantSections.join('\n\n'); // Join multiple found sections if any
+        } else {
+            return 'No specific section found for this query.';
+        }
+    };
+
     return (
         <div>
-            <h2>Search Animals</h2>
+            <h2>Search Animal Information</h2>
             <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Enter animal name"
+                placeholder="Enter animal topic (e.g., 'Lion Habitat')"
             />
             <button onClick={handleSearch}>Search</button>
             
             {error && <p style={{ color: 'red' }}>{error}</p>}
             
             <div>
-                <h3>DuckDuckGo Results:</h3>
-                {results.map((result, index) => (
-                    <div key={index}>
-                        <h4>{result.title}</h4>
-                        <p>{result.abstract}</p>
-                    </div>
-                ))}
-            </div>
-            
-            <div>
-                <h3>Wikipedia Full Content:</h3>
-                <p>{wikiContent}</p>
+                <h3>Relevant Information:</h3>
+                <p>{result}</p>
             </div>
         </div>
     );

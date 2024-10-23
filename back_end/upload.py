@@ -2,7 +2,7 @@ from connection import connect
 import requests
 
 # Initialize Firebase
-# cred = credentials.Certificate(
+#  cred = credentials.Certificate(
 #     'https://opensphere-62cfa-default-rtdb.firebaseio.com/')
 # firebase_admin.initialize_app(cred, {
 #     'databaseURL': 'https://opensphere-62cfa-default-rtdb.firebaseio.com/'
