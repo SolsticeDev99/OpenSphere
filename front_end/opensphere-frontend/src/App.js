@@ -1,18 +1,17 @@
-
-// App.js
-
 import React from 'react';
-import SearchComponent from './components/SearchComponent'; // Adjust the path to where your component is stored
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import HomeScreen from './components/HomeScreen';
+import AuthComponent from './components/AuthComponent';
 
-function App() {
-  return (
-    <div className="App">
-      {/* Only the Search Component is being rendered here */}
-      <SearchComponent />
-    </div>
-  );
-}
+const App = () => {
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<HomeScreen />} />
+                <Route path="/auth" element={<AuthComponent />} />
+            </Routes>
+        </Router>
+    );
+};
 
 export default App;
-
-

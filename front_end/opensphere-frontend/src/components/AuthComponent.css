@@ -1,0 +1,26 @@
+.auth-component {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #2a2a2a;
+  color: white;
+}
+
+.auth-component input {
+  margin: 10px 0;
+  padding: 10px;
+  width: 80%;
+}
+
+.auth-component button {
+  padding: 10px;
+  background-color: #444;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.auth-component .error {
+  color: red;
+}

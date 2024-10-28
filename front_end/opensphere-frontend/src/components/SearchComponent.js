@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './SearchComponentDarkTheme.css'; // Your dark theme CSS file
 
 const SearchComponent = () => {
     const [query, setQuery] = useState('');
@@ -9,65 +10,76 @@ const SearchComponent = () => {
     const handleSearch = async () => {
         if (!query) return;
 
-        setError(''); // Clear any previous errors
-        setResult(''); // Clear previous result
-
+        setError(''); // Clear previous errors
+        setResult(''); // Clear previous results
         try {
-            // Fetch the full Wikipedia content for the specified animal
-            const animal = query.split(' ')[0]; // Get the first word as the animal name
+            // Split the query to check for animal name and keyword
+            const words = query.split(' ');
+            const animalName = words.slice(0, -1).join(' ') || query; // Use entire query if there's no keyword
+            const keyword = words[words.length - 1].toLowerCase(); // Last word as the keyword
+
+            // Fetch full Wikipedia content for the animal
             const wikiResponse = await axios.get('https://en.wikipedia.org/w/api.php', {
                 params: {
                     action: 'query',
                     prop: 'extracts',
                     explaintext: true,
-                    titles: animal,
+                    titles: animalName,
                     format: 'json',
-                    origin: '*', // Allow CORS
+                    origin: '*', // Needed for CORS
                 },
             });
 
             const wikiPages = wikiResponse.data.query.pages;
-            const page = Object.values(wikiPages)[0]; // Get the first (and only) page
+            if (!wikiPages) {
+                throw new Error('No pages found in the response.');
+            }
 
-            if (page.extract) {
-                const sectionData = extractSection(page.extract, query);
-                setResult(sectionData);
+            const page = Object.values(wikiPages)[0]; // Get the first page
+
+            if (page && page.extract) {
+                const fullContent = page.extract;
+
+                // If a keyword is present, check for specific keyword match
+                let matchedSections = [];
+                if (words.length > 1) { // Only check for keyword matches if there's more than one word
+                    const sections = fullContent.split("\n\n"); // Split full content into sections
+                    matchedSections = sections.filter(section => section.toLowerCase().includes(keyword));
+
+                    // Only set result to matched sections if found
+                    if (matchedSections.length > 0) {
+                        setResult(`Matched Section:\n\n${matchedSections.join('\n\n')}`);
+                    } else {
+                        setResult(`No specific information found for the section: "${keyword}".`);
+                    }
+                } else {
+                    // If there's no keyword, just return the full content
+                    setResult(`Full Content:\n\n${fullContent}`);
+                }
             } else {
-                setResult('No content found for this query.');
+                setResult('No content found for the specified animal.');
             }
         } catch (err) {
             setError('Error fetching data: ' + err.message);
-        }
-    };
-
-    const extractSection = (text, keyword) => {
-        const normalizedKeyword = keyword.toLowerCase();
-        const sections = text.split(/\n{2,}/); // Split by two or more newlines
-        const relevantSections = sections.filter(section => section.toLowerCase().includes(normalizedKeyword));
-
-        if (relevantSections.length > 0) {
-            return relevantSections.join('\n\n'); // Join multiple found sections if any
-        } else {
-            return 'No specific section found for this query.';
+            console.error(err); // Log the error for further inspection
         }
     };
 
     return (
-        <div>
-            <h2>Search Animal Information</h2>
+        <div className="search-component">
+            <h2>Search Animals</h2>
             <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Enter animal topic (e.g., 'Lion Habitat')"
+                placeholder="Enter keyword (e.g., 'Red Panda Habitat')"
             />
             <button onClick={handleSearch}>Search</button>
-            
+
             {error && <p style={{ color: 'red' }}>{error}</p>}
-            
             <div>
-                <h3>Relevant Information:</h3>
-                <p>{result}</p>
+                <h3>Results:</h3>
+                <pre>{result}</pre>
             </div>
         </div>
     );
