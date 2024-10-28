@@ -125,3 +125,32 @@ body {
     color: #00ff7f;
     text-decoration: none;
 }
+
+.signup-button {
+    background-color: #28a745; /* Green background */
+    color: white; /* White text */
+    border: none; /* No border */
+    padding: 10px 20px; /* Padding */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Transition effect */
+}
+
+.signup-button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+.login-button {
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    border: none; /* No border */
+    padding: 10px 20px; /* Padding */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Transition effect */
+    margin-left: 10px; /* Space between Sign Up and Login buttons */
+}
+
+.login-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
