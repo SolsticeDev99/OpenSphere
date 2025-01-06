@@ -10,7 +10,11 @@ const HomeScreen = () => {
 
     const handleSignUp = () => {
         navigate('/signup'); // Navigate to the Sign Up page when clicked
+
     };
+    const handleLogin = () => {
+        navigate('/login');
+    }
 
     return (
         <div className="home-screen">
@@ -21,7 +25,7 @@ const HomeScreen = () => {
                     <a href="#features">Features</a>
                     <a href="#contact">Contact</a>
                     <button className="signup-button" onClick={handleSignUp}>Sign Up</button> {/* Sign Up Button */}
-                    <button className="login-button">Login</button> {/* Login Button */}
+                    <button className="login-button" onClick={handleLogin}>Login</button>{/* Login Button */}
                 </nav>
             </header>
 

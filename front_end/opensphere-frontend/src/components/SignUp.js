@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { auth } from './firebaseConfig'; // Import your Firebase configuration
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import './SignUpComponent.css'; // Import your CSS file for styling
+import { getDatabase,set,ref } from 'firebase/database';
 
 const SignUpComponent = () => {
     const [username, setUsername] = useState(''); // State for username
@@ -18,7 +19,16 @@ const SignUpComponent = () => {
 
         try {
             // Create user with email and password
-            await createUserWithEmailAndPassword(auth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user
+            
+            const db = getDatabase();
+            await set(ref(db,`users/${user.uid}`),{
+                username:username,
+                email:email,
+                createdAt: new Date().toISOString(),
+            });
+            
             setSuccess('User registered successfully!'); // Show success message
         } catch (err) {
             setError(err.message); // Show error message
