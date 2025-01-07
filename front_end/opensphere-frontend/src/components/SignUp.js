@@ -1,9 +1,10 @@
 // src/SignUpComponent.js
 import React, { useState } from 'react';
-import { auth } from './firebaseConfig'; // Import your Firebase configuration
+import { auth,provider } from './firebaseConfig'; // Import your Firebase configuration
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import './SignUpComponent.css'; // Import your CSS file for styling
-import { getDatabase,set,ref } from 'firebase/database';
+import { getDatabase,set,ref,get } from 'firebase/database';
+import { signInWithPopup } from 'firebase/auth';
 
 const SignUpComponent = () => {
     const [username, setUsername] = useState(''); // State for username
@@ -18,6 +19,12 @@ const SignUpComponent = () => {
         setSuccess(''); // Clear previous success messages
 
         try {
+            const usersnapshot = await get(ref(getDatabase(),`users/${email}`));
+            if(usersnapshot.exists()){ 
+                setError('User already exists!'); // Show error message
+                return;
+            }
+
             // Create user with email and password
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user
@@ -35,6 +42,34 @@ const SignUpComponent = () => {
         }
     };
 
+const handle_google_signup = async (e) => {
+    setError(''); // Clear previous errors
+    setSuccess(''); // Clear previous success messages
+
+    try{
+        const result = await signInWithPopup(auth,provider);
+        const user = result.user;
+
+        const db = getDatabase();
+        const userRef = ref(db,`users/${user.uid}`);
+        const snapshot = await get(userRef);
+
+        if (snapshot.exists()) {
+            setSuccess('Account already exists with this email. Please log in or use a different email.'); // Show success message
+        }else{
+            await set(ref(db,`users/${user.uid}`),{
+                username:user.displayName,
+                email:user.email,
+                createdAt: new Date().toISOString(),
+            });
+            setSuccess('User registered successfully!'); // Show success message
+        }
+    }catch (err) {
+        setError(err.message); // Show error message
+    }
+
+
+}
     return (
         <div className="signup-container">
             <h2>Sign Up</h2>
@@ -61,6 +96,7 @@ const SignUpComponent = () => {
                     required
                 />
                 <button type="submit" className="signup-button">Sign Up</button>
+                <button id='signup_google_bt' type='button' className="signup_google" onClick={handle_google_signup}>Sign Up With Google</button>
             </form>
             {error && <p className="error-message">{error}</p>}
             {success && <p className="success-message">{success}</p>}
