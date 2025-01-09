@@ -1,156 +1,182 @@
-/* HomeScreenDarkTheme.css */
+/* Body and general layout */
 body {
-    background-color: #1b1b1b;
-    color: #e0e0e0;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
+  background-color: #121212; /* Dark background */
+  color: #e0e0e0; /* Light text color */
+  font-family: "Roboto", sans-serif; /* Professional font */
+  margin: 0;
+  padding: 0;
 }
 
 .home-screen {
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #1b1b1b;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #121212; /* Dark background */
 }
 
+/* Header */
 .home-header {
-    width: 100%;
-    padding: 20px;
-    background-color: #0b3d0b;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  width: 100%;
+  padding: 20px;
+  background-color: #0b3d0b; /* Dark green header */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .home-header h1 {
-    color: #00ff7f;
-    margin: 0;
+  color: #00ff7f; /* Neon green color for the header */
+  margin: 0;
+  font-family: "Roboto", sans-serif;
 }
 
+/* Navigation bar */
 .nav-bar a {
-    margin: 0 10px;
-    color: #e0e0e0;
-    text-decoration: none;
+  margin: 0 10px;
+  color: #e0e0e0; /* Light text */
+  text-decoration: none;
+  font-size: 1.1rem;
 }
 
+/* Hero section */
 .hero-section {
-    text-align: center;
-    margin: 40px 0;
+  text-align: center;
+  margin: 40px 0;
 }
 
 .hero-section h2 {
-    font-size: 36px;
-    color: #00ff7f;
+  font-size: 36px;
+  color: #00ff7f; /* Neon green color */
 }
 
 .hero-section p {
-    font-size: 18px;
-    color: #dcdcdc;
+  font-size: 18px;
+  color: #dcdcdc; /* Light grey text */
 }
 
-.search-section {
-    width: 80%;
-    margin: 20px 0;
-}
-
+/* Search and featured sections */
+.search-section,
 .featured-section {
-    width: 80%;
-    margin: 30px 0;
+  width: 80%;
+  margin: 20px 0;
 }
 
 .featured-section h3 {
-    font-size: 28px;
-    color: #00ff7f;
-    margin-bottom: 20px;
+  font-size: 28px;
+  color: #00ff7f; /* Neon green */
+  margin-bottom: 20px;
 }
 
+/* Featured species cards */
 .featured-species {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
 }
 
 .species-card {
-    width: 200px;
-    padding: 20px;
-    border: 2px solid #00ff7f;
-    background-color: #333;
-    color: #e0e0e0;
-    border-radius: 12px;
-    transition: transform 0.2s, box-shadow 0.2s;
+  width: 200px;
+  padding: 20px;
+  border: 2px solid #00ff7f; /* Neon green border */
+  background-color: #333; /* Dark background for cards */
+  color: #e0e0e0; /* Light text */
+  border-radius: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .species-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 255, 127, 0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 255, 127, 0.2);
 }
 
 .species-card h4 {
-    margin: 0 0 10px 0;
-    color: #00ff7f;
+  margin: 0 0 10px 0;
+  color: #00ff7f; /* Neon green for card headings */
 }
 
 .species-card p {
-    color: #dcdcdc;
+  color: #dcdcdc; /* Light grey text for card details */
 }
 
+/* About section */
 .about-section {
-    width: 80%;
-    margin: 40px 0;
+  width: 80%;
+  margin: 40px 0;
 }
 
 .about-section h3 {
-    font-size: 28px;
-    color: #00ff7f;
-    margin-bottom: 15px;
+  font-size: 28px;
+  color: #00ff7f; /* Neon green */
+  margin-bottom: 15px;
 }
 
+/* Footer */
 .home-footer {
-    width: 100%;
-    padding: 10px;
-    background-color: #0b3d0b;
-    text-align: center;
+  width: 100%;
+  padding: 10px;
+  background-color: #0b3d0b; /* Dark green footer */
+  text-align: center;
 }
 
 .home-footer p {
-    margin: 0;
-    color: #dcdcdc;
+  margin: 0;
+  color: #dcdcdc; /* Light text */
 }
 
 .home-footer a {
-    color: #00ff7f;
-    text-decoration: none;
+  color: #00ff7f; /* Neon green links */
+  text-decoration: none;
+}
+
+/* Buttons */
+.signup-button,
+.login-button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border: none;
+  width: 100%; /* Full width for buttons */
+  max-width: 200px; /* Limit max width */
+  margin: 10px auto; /* Centered with space */
 }
 
 .signup-button {
-    background-color: #28a745; /* Green background */
-    color: white; /* White text */
-    border: none; /* No border */
-    padding: 10px 20px; /* Padding */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s; /* Transition effect */
+  background-color: #00ff7f; /* Neon green background */
 }
 
 .signup-button:hover {
-    background-color: #218838; /* Darker green on hover */
+  background-color: #00cc66; /* Darker green on hover */
 }
 
 .login-button {
-    background-color: #007bff; /* Blue background */
-    color: white; /* White text */
-    border: none; /* No border */
-    padding: 10px 20px; /* Padding */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s; /* Transition effect */
-    margin-left: 10px; /* Space between Sign Up and Login buttons */
+  background-color: #007bff; /* Blue background */
 }
 
 .login-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Input fields */
+input {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #00ff7f;
+  background-color: #333;
+  color: #e0e0e0;
+  width: 100%;
+  max-width: 400px;
+  font-size: 16px;
+}
+
+input:focus {
+  border-color: #00cc66; /* Darker green on focus */
+  outline: none;
 }

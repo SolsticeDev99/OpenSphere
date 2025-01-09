@@ -1,0 +1,117 @@
+/* Importing Poppins font from Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
+
+/* General container styling */
+.instagram-home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+  background: linear-gradient(
+    135deg,
+    #004d00,
+    #0066cc
+  ); /* Dark green to blue gradient */
+  font-family: "Poppins", sans-serif; /* Stylish and professional font */
+  color: #f0f0f0; /* Light text for readability */
+  text-align: center;
+}
+
+.left-section {
+  width: 40%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.app-title {
+  font-size: 48px;
+  font-weight: 600; /* Semi-bold for a modern feel */
+  color: #a8e6a1; /* Lighter green for the title */
+  margin-bottom: 20px;
+}
+
+.tagline {
+  font-size: 18px;
+  color: #d0f7d0; /* Lighter mint green for a softer contrast */
+  line-height: 1.5;
+}
+
+/* Right section */
+.right-section {
+  width: 40%;
+  text-align: center;
+  padding: 30px;
+  background-color: #00222e; /* Dark blue-green box */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); /* Dark shadow for depth */
+  border-radius: 15px; /* More rounded corners for modern look */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.right-section h2 {
+  font-size: 32px;
+  color: #a8e6a1; /* Lighter green for the heading */
+  margin-bottom: 20px;
+}
+
+.right-section p {
+  font-size: 16px;
+  color: #d0f7d0; /* Lighter mint green for the paragraph text */
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* Button Styles */
+.right-section .btn {
+  background-color: #006400; /* Dark Green Button Background */
+  color: #ffffff; /* White text */
+  border: none;
+  padding: 15px 25px;
+  margin: 10px;
+  font-size: 18px;
+  font-weight: 600; /* Bold font for better legibility */
+  border-radius: 8px; /* Rounded corners */
+  cursor: pointer;
+  width: 80%;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Shadow for depth */
+}
+
+.right-section .btn:hover {
+  background-color: #228b22; /* Lighter green when hovered */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); /* Slightly stronger shadow on hover */
+}
+
+.right-section .btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #006400; /* Focus outline for accessibility */
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .instagram-home {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .left-section,
+  .right-section {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .app-title {
+    font-size: 36px;
+  }
+
+  .right-section {
+    box-shadow: none;
+    border-radius: 0;
+  }
+}
