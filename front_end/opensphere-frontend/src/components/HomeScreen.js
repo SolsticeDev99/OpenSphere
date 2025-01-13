@@ -1,20 +1,15 @@
-// src/HomeScreen.js
-
 import React from "react";
 import "./HomeScreen.css";
 import SearchComponent from "./SearchComponent";
-// import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from "react-router-dom"; // Import useNavigate for routing
 
 const HomeScreen = () => {
-  // const navigate = useNavigate(); // Get the navigate function
+  const navigate = useNavigate(); // Get the navigate function
 
-  // const handleSignUp = () => {
-  //     navigate('/signup'); // Navigate to the Sign Up page when clicked
-
-  // };
-  // const handleLogin = () => {
-  //     navigate('/login');
-  // }
+  // Function to handle navigation to the data page
+  const handleGoToDataPage = () => {
+    navigate("/view"); // Navigate to the data page
+  };
 
   return (
     <div className="home-screen">
@@ -26,6 +21,13 @@ const HomeScreen = () => {
           <a href="#contact">Contact</a>
         </nav>
       </header>
+
+      {/* Button placed near the top */}
+      <div className="explore-data-button-container">
+        <button onClick={handleGoToDataPage} className="explore-data-button">
+          Explore Wildlife Data
+        </button>
+      </div>
 
       <section className="hero-section">
         <h2>Welcome to OpenSphere</h2>

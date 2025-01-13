@@ -6,6 +6,7 @@ import SignUpComponent from "./components/SignUp";
 import HomeScreen from "./components/HomeScreen";
 import LoginComponent from "./components/Login";
 import Fyp from "./components/fyp";
+import InfiniteScrollPage from "./components/upload";
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
           <Route path="/signup" element={<SignUpComponent />} />
           <Route path="/login" element={<LoginComponent />} />
           <Route path="/fyp" element={<HomeScreen />} />
+          <Route path="/view" element={<InfiniteScrollPage />} />
         </Routes>
       </div>
     </Router>
