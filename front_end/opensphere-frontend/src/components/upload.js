@@ -55,7 +55,6 @@ const CustomPage = () => {
 
   // Handle Browse button click (fetch files from Firebase Storage)
   const handleBrowse = async () => {
-    // Fetch files from Firebase Storage
     const storage = getStorage();
     const storageRef = ref(storage, "files/"); // Reference to the folder where the files are stored
 
@@ -71,6 +70,11 @@ const CustomPage = () => {
         const fileName = fileRef.name;
         const url = await getDownloadURL(fileRef);
 
+        // Determine the file type based on the file extension
+        const fileType = fileName.endsWith(".pdf")
+          ? "application/pdf"
+          : "unknown";
+
         // Retrieve the vote count directly from the "files" folder in the database
         const db = getDatabase();
         const voteRef = dbRef(db, `files/${sanitizeFileName(fileName)}`);
@@ -79,7 +83,7 @@ const CustomPage = () => {
           ? voteSnapshot.val().voteCount
           : 0;
 
-        return { file: fileName, url, voteCount };
+        return { file: fileName, type: fileType, url, voteCount };
       });
 
       // Wait for all file data to be retrieved
@@ -87,6 +91,7 @@ const CustomPage = () => {
 
       // Update the local state with files data
       setFiles(filesData);
+      console.log("Files loaded successfully:", filesData);
     } catch (error) {
       console.error("Error fetching files:", error);
     }
@@ -162,11 +167,13 @@ const CustomPage = () => {
             {file.type === "application/pdf" ? (
               <div className="pdf-preview">
                 <iframe
-                  src={file.url}
+                  src={`${file.url}#toolbar=1&navpanes=0`}
                   width="600"
                   height="600" // Adjusted height for better display
                   title="PDF Preview"
                   frameBorder="0"
+                  allowFullScreen
+                  onError={() => alert("Failed to load PDF.")}
                 />
               </div>
             ) : (
