@@ -5,26 +5,94 @@ import {
   uploadBytes,
   getDownloadURL,
   listAll,
-} from "firebase/storage"; // Firebase Storage utilities
-import { getDatabase, ref as dbRef, set, get, update } from "firebase/database"; // Firebase Realtime Database utilities
-import { getAuth } from "firebase/auth"; // Firebase Authentication
+} from "firebase/storage";
+import { getAuth } from "firebase/auth";
+import { getDatabase, ref as dbRef, get } from "firebase/database";
 import "./upload.css";
 
 const CustomPage = () => {
-  const [files, setFiles] = useState([]); // Stores uploaded files and Firebase files
-  const [uploadMessage, setUploadMessage] = useState(""); // For showing upload success message
-  const [showModal, setShowModal] = useState(false);
-  const [caption, setCaption] = useState("");
+  const [files, setFiles] = useState([]);
+  const [uploadMessage, setUploadMessage] = useState("");
+  const [profilePicUrl, setProfilePicUrl] = useState(""); // State to store profile picture URL
+  const [username, setUsername] = useState("");
   const [preview, setPreview] = useState(null);
 
   const auth = getAuth(); // Get current user authentication
 
-  // Sanitize file name for Firebase path (to avoid invalid characters)
-  const sanitizeFileName = (fileName) => {
-    return fileName.replace(/[.#$[\]]/g, "_"); // Replace problematic characters
-  };
+  // Fetch username and profile pic on component load
+  useEffect(() => {
+    const fetchUsernameAndProfilePic = async () => {
+      if (auth.currentUser) {
+        // Fetch username from Realtime Database
+        const db = getDatabase();
+        const usernameRef = dbRef(db, `users/${auth.currentUser.uid}/username`);
+        const snapshot = await get(usernameRef);
+        if (snapshot.exists()) {
+          setUsername(snapshot.val());
+        }
 
-  // Handle file upload (for Upload+ button)
+        // Check if profile pic exists in localStorage first
+        const storedProfilePicUrl = localStorage.getItem("profilePicUrl");
+        if (storedProfilePicUrl) {
+          setProfilePicUrl(storedProfilePicUrl);
+        } else {
+          // If no profile pic in localStorage, fetch from Firebase Storage
+          const storage = getStorage();
+          const profilePicRef = ref(
+            storage,
+            `profile-pics/${auth.currentUser.uid}`
+          );
+
+          try {
+            const url = await getDownloadURL(profilePicRef);
+            setProfilePicUrl(url); // Set profile picture URL in the state
+            // Store the profile picture URL in localStorage
+            localStorage.setItem("profilePicUrl", url);
+          } catch (error) {
+            console.error("Error fetching profile picture:", error);
+          }
+        }
+      }
+    };
+
+    if (auth.currentUser) {
+      fetchUsernameAndProfilePic();
+    }
+  }, [auth.currentUser]); // Depend on auth.currentUser to refetch when user is logged in
+
+  // Fetch files from Firebase Storage when the page loads
+  useEffect(() => {
+    const fetchFiles = async () => {
+      const storage = getStorage();
+      const storageRef = ref(storage, "files/"); // Reference to the folder where the files are stored
+
+      try {
+        // Get a list of all the files in the storage reference
+        const fileList = await listAll(storageRef);
+
+        // Fetch the download URL for each file and store in the state
+        const fileDataPromises = fileList.items.map(async (fileRef) => {
+          const fileName = fileRef.name;
+          const url = await getDownloadURL(fileRef);
+
+          return { file: fileName, url, type: fileRef.name.split(".").pop() }; // Store file type
+        });
+
+        // Wait for all file data to be retrieved
+        const filesData = await Promise.all(fileDataPromises);
+
+        // Update the local state with files data
+        setFiles(filesData);
+        console.log("Files loaded successfully:", filesData);
+      } catch (error) {
+        console.error("Error fetching files:", error);
+      }
+    };
+
+    fetchFiles(); // Automatically fetch files when the page loads
+  }, []); // Empty dependency array means it only runs once when the component mounts
+
+  // Handle file upload (for general file upload, excluding profile pic)
   const handleUpload = (event) => {
     const uploadedFiles = Array.from(event.target.files);
     uploadedFiles.forEach((file) => {
@@ -53,90 +121,46 @@ const CustomPage = () => {
     });
   };
 
-  // Handle Browse button click (fetch files from Firebase Storage)
-  const handleBrowse = async () => {
-    const storage = getStorage();
-    const storageRef = ref(storage, "files/"); // Reference to the folder where the files are stored
+  // Handle file upload (for profile picture upload)
+  const handleProfilePicUpload = (event) => {
+    const file = event.target.files[0];
 
-    try {
-      // Get a list of all the files in the storage reference
-      const fileList = await listAll(storageRef);
+    if (file) {
+      // Create a reference to the profile picture in Firebase Storage
+      const storage = getStorage();
+      const storageRef = ref(storage, `profile-pics/${auth.currentUser.uid}`);
 
-      // Clear the current files in the main scrollbar (if any)
-      setFiles([]);
+      // Upload the profile picture to Firebase Storage
+      uploadBytes(storageRef, file).then((snapshot) => {
+        console.log("Profile picture uploaded!");
 
-      // Fetch the download URL for each file and store in the state
-      const fileDataPromises = fileList.items.map(async (fileRef) => {
-        const fileName = fileRef.name;
-        const url = await getDownloadURL(fileRef);
+        // Get the download URL of the uploaded file
+        getDownloadURL(snapshot.ref).then((url) => {
+          // Update the profilePicUrl state with the new image URL
+          setProfilePicUrl(url);
+          // Store the new profile picture URL in localStorage
+          localStorage.setItem("profilePicUrl", url);
+        });
 
-        // Determine the file type based on the file extension
-        const fileType = fileName.endsWith(".pdf")
-          ? "application/pdf"
-          : "unknown";
-
-        // Retrieve the vote count directly from the "files" folder in the database
-        const db = getDatabase();
-        const voteRef = dbRef(db, `files/${sanitizeFileName(fileName)}`);
-        const voteSnapshot = await get(voteRef);
-        const voteCount = voteSnapshot.exists()
-          ? voteSnapshot.val().voteCount
-          : 0;
-
-        return { file: fileName, type: fileType, url, voteCount };
+        // Show upload success message
+        setUploadMessage("Profile picture uploaded successfully!");
       });
-
-      // Wait for all file data to be retrieved
-      const filesData = await Promise.all(fileDataPromises);
-
-      // Update the local state with files data
-      setFiles(filesData);
-      console.log("Files loaded successfully:", filesData);
-    } catch (error) {
-      console.error("Error fetching files:", error);
     }
   };
 
-  // Handle vote button click (each account can vote only once per file)
-  const handleVote = (index) => {
-    const db = getDatabase();
-    const fileToUpdate = files[index];
+  // Alert before refreshing
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "Are you sure you want to leave?"; // Default message for most browsers
+    };
 
-    // Get current user ID
-    const userId = auth.currentUser ? auth.currentUser.uid : null;
-    if (!userId) {
-      alert("You need to be logged in to vote!");
-      return;
-    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
-    // Check if the user has already voted for this file
-    const userVoteRef = dbRef(
-      db,
-      `files/${sanitizeFileName(fileToUpdate.file)}/${userId}`
-    );
-    get(userVoteRef).then((snapshot) => {
-      if (snapshot.exists()) {
-        alert("You have already voted for this file!");
-        return;
-      }
-
-      // If not voted, increment the vote count in the database
-      const newVoteCount = fileToUpdate.voteCount + 1;
-      update(dbRef(db, `files/${sanitizeFileName(fileToUpdate.file)}`), {
-        voteCount: newVoteCount,
-      });
-
-      // Store the user's vote in the database to prevent multiple votes
-      set(userVoteRef, { voted: true });
-
-      // Update the local state to reflect the new vote count
-      setFiles((prevFiles) =>
-        prevFiles.map((file, i) =>
-          i === index ? { ...file, voteCount: newVoteCount } : file
-        )
-      );
-    });
-  };
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
 
   return (
     <div className="page-container">
@@ -153,52 +177,63 @@ const CustomPage = () => {
           onChange={handleUpload}
           style={{ display: "none" }}
         />
-        {/* Browse Button placed below Upload+ Button */}
-        <button onClick={handleBrowse} className="browse-button">
-          Browse Files
-        </button>
       </div>
 
       {/* Main Content */}
       <div className="main-content">
-        {files.length > 0 && <h3>Uploaded & Firebase Files:</h3>}
+        {files.length > 0 && <h3>Avilable Data:</h3>}
         {files.map((file, index) => (
           <div key={index} className="file-preview">
-            {file.type === "application/pdf" ? (
-              <div className="pdf-preview">
+            <div className="image-preview">
+              {file.type === "pdf" ? (
                 <iframe
-                  src={`${file.url}#toolbar=1&navpanes=0`}
-                  width="600"
-                  height="600" // Adjusted height for better display
-                  title="PDF Preview"
-                  frameBorder="0"
-                  allowFullScreen
-                  onError={() => alert("Failed to load PDF.")}
-                />
-              </div>
-            ) : (
-              <div className="image-preview">
+                  src={file.url}
+                  title={`Uploaded ${index}`}
+                  width="100%"
+                  height="500px"
+                  style={{ border: "none" }}
+                ></iframe>
+              ) : (
                 <img
                   src={file.url}
                   alt={`Uploaded ${index}`}
                   className="uploaded-image"
                 />
-              </div>
-            )}
-            <button onClick={() => handleVote(index)} className="vote-button">
-              Vote
-            </button>
-            <p>Votes: {file.voteCount}</p>
+              )}
+            </div>
           </div>
         ))}
-
         {uploadMessage && <p className="upload-message">{uploadMessage}</p>}
       </div>
 
       {/* Right Sidebar */}
       <div className="right-sidebar">
-        <div className="profile-pic"></div>
-        <p className="username">username:</p>
+        {/* Profile Info Container */}
+        <div className="profile-info-container">
+          <div className="profile-pic-container">
+            <label htmlFor="profile-pic-upload" className="profile-pic">
+              {profilePicUrl ? (
+                <img
+                  src={profilePicUrl}
+                  alt="Profile"
+                  className="profile-pic-image"
+                />
+              ) : (
+                <span className="profile-pic-placeholder">+</span>
+              )}
+            </label>
+            <input
+              id="profile-pic-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleProfilePicUpload}
+              style={{ display: "none" }}
+            />
+          </div>
+
+          {/* Username */}
+          <p className="username">{username || "Loading..."}</p>
+        </div>
       </div>
     </div>
   );

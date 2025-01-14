@@ -1,5 +1,9 @@
 .search-component {
-  background-color: #1a1a1a; /* Dark background */
+  background: linear-gradient(
+    135deg,
+    #4caf50,
+    #2196f3
+  ); /* Green to Blue gradient */
   color: #ffffff; /* White text */
   padding: 20px; /* Spacing inside the component */
   border-radius: 8px; /* Rounded corners */
