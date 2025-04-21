@@ -1,8 +1,6 @@
-// firebaseConfig.js
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getStorage } from "firebase/storage";
-// import { getDatabase,set,ref } from 'firebase/database';
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyDBxawxfrBMnQd39GOrCHkSqWUzFGPiPq8",
@@ -13,9 +11,11 @@ const firebaseConfig = {
   appId: "1:222953338493:web:6d8921dbfa02d12cd3e314",
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
-// const storage = getStorage(app);
+//const database = getDatabase(app); // Add this line for Realtime Database
+//const storage = getStorage(app); // Uncomment if you need Firebase Storage
 
-export { auth, provider };
+export { auth, provider};
