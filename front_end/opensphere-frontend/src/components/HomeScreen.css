@@ -16,18 +16,22 @@ body {
   background-color: #121212; /* Dark background */
 }
 
-/* Header */
+/* Header with gradient background */
 .home-header {
   width: 100%;
   padding: 20px;
-  background-color: #0b3d0b; /* Dark green header */
+  background: linear-gradient(
+    135deg,
+    #4caf50,
+    #2196f3
+  ); /* Green to Blue gradient */
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .home-header h1 {
-  color: #00ff7f; /* Neon green color for the header */
+  color: #e5e9ec; /* Neon green color for the header */
   margin: 0;
   font-family: "Roboto", sans-serif;
 }

@@ -19,15 +19,12 @@ const HomeScreen = () => {
           <a href="#about">About</a>
           <a href="#features">Features</a>
           <a href="#contact">Contact</a>
+          {/* Button placed near the About, Features, and Contact links */}
+          <button onClick={handleGoToDataPage} className="explore-data-button">
+            Explore Wildlife Data
+          </button>
         </nav>
       </header>
-
-      {/* Button placed near the top */}
-      <div className="explore-data-button-container">
-        <button onClick={handleGoToDataPage} className="explore-data-button">
-          Explore Wildlife Data
-        </button>
-      </div>
 
       <section className="hero-section">
         <h2>Welcome to OpenSphere</h2>

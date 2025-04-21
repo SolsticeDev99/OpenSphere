@@ -5,47 +5,95 @@ import {
   uploadBytes,
   getDownloadURL,
   listAll,
-} from "firebase/storage"; // Firebase Storage utilities
-import { getDatabase, ref as dbRef, set, get, update } from "firebase/database"; // Firebase Realtime Database utilities
-import { getAuth } from "firebase/auth"; // Firebase Authentication
+} from "firebase/storage";
+import { getAuth } from "firebase/auth";
+import { getDatabase, ref as dbRef, get, update } from "firebase/database";
 import "./upload.css";
 
 const CustomPage = () => {
-  const [files, setFiles] = useState([]); // Stores uploaded files and Firebase files
-  const [uploadMessage, setUploadMessage] = useState(""); // For showing upload success message
-  const [showModal, setShowModal] = useState(false);
-  const [caption, setCaption] = useState("");
-  const [preview, setPreview] = useState(null);
+  const [files, setFiles] = useState([]);
+  const [uploadMessage, setUploadMessage] = useState("");
+  const [profilePicUrl, setProfilePicUrl] = useState("");
+  const [username, setUsername] = useState("");
 
-  const auth = getAuth(); // Get current user authentication
+  const auth = getAuth();
 
-  // Sanitize file name for Firebase path (to avoid invalid characters)
-  const sanitizeFileName = (fileName) => {
-    return fileName.replace(/[.#$[\]]/g, "_"); // Replace problematic characters
-  };
+  useEffect(() => {
+    const fetchUsernameAndProfilePic = async () => {
+      if (auth.currentUser) {
+        const db = getDatabase();
+        const usernameRef = dbRef(db, `users/${auth.currentUser.uid}/username`);
+        const snapshot = await get(usernameRef);
+        if (snapshot.exists()) {
+          setUsername(snapshot.val());
+        }
 
-  // Handle file upload (for Upload+ button)
+        const storedProfilePicUrl = localStorage.getItem("profilePicUrl");
+        if (storedProfilePicUrl) {
+          setProfilePicUrl(storedProfilePicUrl);
+        } else {
+          const storage = getStorage();
+          const profilePicRef = ref(
+            storage,
+            `profile-pics/${auth.currentUser.uid}`
+          );
+
+          try {
+            const url = await getDownloadURL(profilePicRef);
+            setProfilePicUrl(url);
+            localStorage.setItem("profilePicUrl", url);
+          } catch (error) {
+            console.error("Error fetching profile picture:", error);
+          }
+        }
+      }
+    };
+
+    if (auth.currentUser) {
+      fetchUsernameAndProfilePic();
+    }
+  }, [auth.currentUser]);
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      const storage = getStorage();
+      const storageRef = ref(storage, "files/");
+
+      try {
+        const fileList = await listAll(storageRef);
+
+        const fileDataPromises = fileList.items.map(async (fileRef) => {
+          const fileName = fileRef.name;
+          const url = await getDownloadURL(fileRef);
+
+          return { file: fileName, url, type: fileRef.name.split(".").pop(), votes: 0, hasVoted: false };
+        });
+
+        const filesData = await Promise.all(fileDataPromises);
+        setFiles(filesData);
+      } catch (error) {
+        console.error("Error fetching files:", error);
+      }
+    };
+
+    fetchFiles();
+  }, []);
+
+
   const handleUpload = (event) => {
     const uploadedFiles = Array.from(event.target.files);
     uploadedFiles.forEach((file) => {
       if (file.type.startsWith("image/") || file.type === "application/pdf") {
-        // Create a reference to the file in Firebase Storage
         const storage = getStorage();
         const storageRef = ref(storage, `files/${file.name}`);
 
-        // Upload the file to Firebase Storage
         uploadBytes(storageRef, file).then((snapshot) => {
-          console.log("Uploaded a file!");
-
-          // Get the download URL of the uploaded file
           getDownloadURL(snapshot.ref).then((url) => {
-            // Add the file to the local state
             setFiles((prevFiles) => [
               ...prevFiles,
-              { file: file.name, type: file.type, url: url, voteCount: 0 },
+              { file: file.name, type: file.type, url: url, votes: 0, hasVoted: false },
             ]);
 
-            // Show upload success message
             setUploadMessage("File uploaded successfully!");
           });
         });
@@ -53,94 +101,61 @@ const CustomPage = () => {
     });
   };
 
-  // Handle Browse button click (fetch files from Firebase Storage)
-  const handleBrowse = async () => {
-    const storage = getStorage();
-    const storageRef = ref(storage, "files/"); // Reference to the folder where the files are stored
+  const handleProfilePicUpload = (event) => {
+    const file = event.target.files[0];
 
-    try {
-      // Get a list of all the files in the storage reference
-      const fileList = await listAll(storageRef);
+    if (file) {
+      const storage = getStorage();
+      const storageRef = ref(storage, `profile-pics/${auth.currentUser.uid}`);
 
-      // Clear the current files in the main scrollbar (if any)
-      setFiles([]);
+      uploadBytes(storageRef, file).then((snapshot) => {
+        getDownloadURL(snapshot.ref).then((url) => {
+          setProfilePicUrl(url);
+          localStorage.setItem("profilePicUrl", url);
+        });
 
-      // Fetch the download URL for each file and store in the state
-      const fileDataPromises = fileList.items.map(async (fileRef) => {
-        const fileName = fileRef.name;
-        const url = await getDownloadURL(fileRef);
-
-        // Determine the file type based on the file extension
-        const fileType = fileName.endsWith(".pdf")
-          ? "application/pdf"
-          : "unknown";
-
-        // Retrieve the vote count directly from the "files" folder in the database
-        const db = getDatabase();
-        const voteRef = dbRef(db, `files/${sanitizeFileName(fileName)}`);
-        const voteSnapshot = await get(voteRef);
-        const voteCount = voteSnapshot.exists()
-          ? voteSnapshot.val().voteCount
-          : 0;
-
-        return { file: fileName, type: fileType, url, voteCount };
+        setUploadMessage("Profile picture uploaded successfully!");
       });
-
-      // Wait for all file data to be retrieved
-      const filesData = await Promise.all(fileDataPromises);
-
-      // Update the local state with files data
-      setFiles(filesData);
-      console.log("Files loaded successfully:", filesData);
-    } catch (error) {
-      console.error("Error fetching files:", error);
     }
   };
 
-  // Handle vote button click (each account can vote only once per file)
-  const handleVote = (index) => {
-    const db = getDatabase();
-    const fileToUpdate = files[index];
+  const sanitizePath = (fileName) => {
+    return fileName.replace(/[.#$[\]]/g, '_');
+  };
 
-    // Get current user ID
-    const userId = auth.currentUser ? auth.currentUser.uid : null;
-    if (!userId) {
-      alert("You need to be logged in to vote!");
-      return;
-    }
+  const toggleVote = (index) => {
+    setFiles((prevFiles) => {
+      const updatedFiles = prevFiles.map((file, i) => {
+        if (i === index) {
+          const newVoteCount = file.hasVoted ? file.votes - 1 : file.votes + 1;
+          
+          // Update vote count in Realtime Database
+          const db = getDatabase();
+          const fileRef = dbRef(db, `files/${sanitizePath(file.file)}`);
+          update(fileRef, { votes: newVoteCount });
 
-    // Check if the user has already voted for this file
-    const userVoteRef = dbRef(
-      db,
-      `files/${sanitizeFileName(fileToUpdate.file)}/${userId}`
-    );
-    get(userVoteRef).then((snapshot) => {
-      if (snapshot.exists()) {
-        alert("You have already voted for this file!");
-        return;
-      }
-
-      // If not voted, increment the vote count in the database
-      const newVoteCount = fileToUpdate.voteCount + 1;
-      update(dbRef(db, `files/${sanitizeFileName(fileToUpdate.file)}`), {
-        voteCount: newVoteCount,
+          return {
+            ...file,
+            votes: newVoteCount,
+            hasVoted: !file.hasVoted,
+            highlighted: true, // Highlight vote button
+          };
+        }
+        return { ...file, highlighted: false };
       });
 
-      // Store the user's vote in the database to prevent multiple votes
-      set(userVoteRef, { voted: true });
+      setTimeout(() => {
+        setFiles((files) =>
+          files.map((file) => ({ ...file, highlighted: false }))
+        );
+      }, 2000); // Remove highlight after 2 seconds
 
-      // Update the local state to reflect the new vote count
-      setFiles((prevFiles) =>
-        prevFiles.map((file, i) =>
-          i === index ? { ...file, voteCount: newVoteCount } : file
-        )
-      );
+      return updatedFiles;
     });
   };
 
   return (
     <div className="page-container">
-      {/* Left Sidebar */}
       <div className="left-sidebar">
         <label htmlFor="file-upload" className="upload-button">
           Upload+
@@ -153,52 +168,67 @@ const CustomPage = () => {
           onChange={handleUpload}
           style={{ display: "none" }}
         />
-        {/* Browse Button placed below Upload+ Button */}
-        <button onClick={handleBrowse} className="browse-button">
-          Browse Files
-        </button>
       </div>
 
-      {/* Main Content */}
       <div className="main-content">
-        {files.length > 0 && <h3>Uploaded & Firebase Files:</h3>}
+        {files.length > 0 && <h3>Available Data:</h3>}
         {files.map((file, index) => (
           <div key={index} className="file-preview">
-            {file.type === "application/pdf" ? (
-              <div className="pdf-preview">
+            <div className="image-preview">
+              {file.type === "pdf" ? (
                 <iframe
-                  src={`${file.url}#toolbar=1&navpanes=0`}
-                  width="600"
-                  height="600" // Adjusted height for better display
-                  title="PDF Preview"
-                  frameBorder="0"
-                  allowFullScreen
-                  onError={() => alert("Failed to load PDF.")}
-                />
-              </div>
-            ) : (
-              <div className="image-preview">
+                  src={file.url}
+                  title={`Uploaded ${index}`}
+                  width="100%"
+                  height="500px"
+                  style={{ border: "none" }}
+                ></iframe>
+              ) : (
                 <img
                   src={file.url}
                   alt={`Uploaded ${index}`}
                   className="uploaded-image"
                 />
-              </div>
-            )}
-            <button onClick={() => handleVote(index)} className="vote-button">
-              Vote
-            </button>
-            <p>Votes: {file.voteCount}</p>
+              )}
+            </div>
+            <div className="vote-section">
+              <button
+                className={`vote-button ${file.hasVoted ? "voted" : ""}`}
+                onClick={() => toggleVote(index)}
+              >
+                Vote
+              </button>
+              <p>Votes: {file.votes}</p>
+            </div>
           </div>
         ))}
-
         {uploadMessage && <p className="upload-message">{uploadMessage}</p>}
       </div>
 
-      {/* Right Sidebar */}
       <div className="right-sidebar">
-        <div className="profile-pic"></div>
-        <p className="username">username:</p>
+        <div className="profile-info-container">
+          <div className="profile-pic-container">
+            <label htmlFor="profile-pic-upload" className="profile-pic">
+              {profilePicUrl ? (
+                <img
+                  src={profilePicUrl}
+                  alt="Profile"
+                  className="profile-pic-image"
+                />
+              ) : (
+                <span className="profile-pic-placeholder">+</span>
+              )}
+            </label>
+            <input
+              id="profile-pic-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleProfilePicUpload}
+              style={{ display: "none" }}
+            />
+          </div>
+          <p className="username">{username || "Loading..."}</p>
+        </div>
       </div>
     </div>
   );

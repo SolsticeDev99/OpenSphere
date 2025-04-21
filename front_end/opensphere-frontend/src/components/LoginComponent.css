@@ -114,3 +114,16 @@
   font-size: 1rem;
   text-align: center;
 }
+
+/* Form styling */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 500px; /* Increased max-width to 500px for the form */
+  padding: 2rem;
+  border: 2px solid #a8e6a1; /* Light green border */
+  border-radius: 8px;
+  background-color: #1c1c1c; /* Dark background for the form */
+}
