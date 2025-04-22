@@ -294,3 +294,80 @@
   ); /* Gradient for the scrollbar track */
   border-radius: 6px;
 }
+
+.uploader-pfp {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc; /* optional: adds a soft border */
+  transition: all 0.3s ease;
+  background-color: #eee;
+}
+
+.uploader-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* spacing between image and username */
+  margin-top: 10px;
+}
+
+.caption-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.caption-text p {
+  margin: 0 0 10px 0;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.caption-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.upload-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.upload-button {
+  background-color: #007bff; /* blue */
+  color: white;
+  padding: 6px 12px;
+  font-size: 13px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.upload-button:hover {
+  background-color: #0056b3;
+}
+
+.post-button {
+  background-color: #28a745; /* green */
+  color: white;
+  padding: 6px 12px;
+  font-size: 13px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.post-button:hover {
+  background-color: #1e7e34;
+}
