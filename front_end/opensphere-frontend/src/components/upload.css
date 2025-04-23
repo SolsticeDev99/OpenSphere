@@ -328,12 +328,12 @@
 }
 
 .caption-input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
+  width: 200px; /* 👈 Reduce this value to make it shorter */
+  padding: 6px 10px;
   font-size: 14px;
-  border-radius: 6px;
   border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 10px;
 }
 
 .upload-controls {
@@ -370,4 +370,141 @@
 
 .post-button:hover {
   background-color: #1e7e34;
+}
+
+/* .tag-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  justify-content: flex-start;
+  align-items: center;
+} */
+
+.tag-option {
+  background-color: #eee;
+  padding: 6px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+}
+.tag-option.selected {
+  background-color: #b2e0ff;
+  font-weight: bold;
+}
+
+.tags-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.tag-bubble {
+  background-color: #e0e0e0;
+  color: #333;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.no-results {
+  text-align: center;
+  font-style: italic;
+  margin: 1rem;
+  color: gray;
+}
+
+.filter-tag-button.clear-filter {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  margin-left: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filter-tags {
+  margin-bottom: 1rem;
+}
+
+.filter-tag-button {
+  margin: 0 5px 5px 0;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 999px;
+  background-color: #e0e7ff;
+  color: #374151;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.filter-tag-button.active {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.no-results {
+  text-align: center;
+  font-style: italic;
+  margin: 1rem;
+  color: gray;
+}
+
+.filter-tag-button.clear-filter {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  margin-left: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tag-search-input {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.custom-tag-input.small-input {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  width: 120px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag-search-input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.tag-search-input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 150px; /* 👈 adjust this value to control length */
 }

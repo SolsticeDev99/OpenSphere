@@ -104,6 +104,7 @@ const CustomPage = () => {
             uploaderUsername,
             profilePic,
             caption: metaSnap.exists() ? metaSnap.val().caption || "" : "",
+            tags: metaSnap.exists() ? metaSnap.val().tags || [] : [],
           };
         });
 
@@ -146,6 +147,7 @@ const CustomPage = () => {
             votes: 0,
             uploaderUsername: username,
             caption,
+            tags: selectedTags.map((tag) => tag.toLowerCase()),
           };
           await update(fileDbRef, newFileData);
 
@@ -159,6 +161,7 @@ const CustomPage = () => {
               uploaderUsername: username,
               profilePic: profilePicUrl,
               caption,
+              tags: selectedTags.map((tag) => tag.toLowerCase()),
             },
             ...prevFiles, // Add to the top
           ]);
@@ -260,7 +263,23 @@ const CustomPage = () => {
     }
   };
 
+  const defaultTags = ["animals", "habitat", "info"];
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [customTagInput, setCustomTagInput] = useState("");
+  const [activeFilter, setActiveFilter] = useState("");
+
   const [caption, setCaption] = useState("");
+
+  const filteredFiles = activeFilter
+    ? files.filter(
+        (file) =>
+          file.tags &&
+          file.tags.some(
+            (tag) => tag.toLowerCase() === activeFilter.toLowerCase()
+          )
+      )
+    : files;
+
   return (
     <div className="page-container">
       <div className="left-sidebar">
@@ -271,7 +290,6 @@ const CustomPage = () => {
           placeholder="Enter a caption.."
           className="caption-input"
         />
-
         {/* Show selected file name with cancel button */}
         {selectedFiles && selectedFiles.length > 0 && (
           <div className="selected-file-info">
@@ -285,7 +303,6 @@ const CustomPage = () => {
             </button>
           </div>
         )}
-
         {/* Buttons in horizontal row */}
         <div className="upload-controls">
           <label htmlFor="file-upload" className="upload-button">
@@ -302,14 +319,107 @@ const CustomPage = () => {
           <button onClick={handlePost} className="post-button">
             Post
           </button>
-        </div>
 
+          {selectedFiles && selectedFiles.length > 0 && (
+            <div className="tags-section">
+              <p>Tags:</p>
+              <div className="tag-options">
+                {defaultTags.map((tag) => (
+                  <div
+                    key={tag}
+                    className={`tag-option ${
+                      selectedTags.includes(tag) ? "selected" : ""
+                    }`}
+                    onClick={() => {
+                      if (selectedTags.includes(tag)) {
+                        setSelectedTags(selectedTags.filter((t) => t !== tag));
+                      } else {
+                        setSelectedTags([...selectedTags, tag]);
+                      }
+                    }}
+                  >
+                    {tag}
+                  </div>
+                ))}
+              </div>
+              <input
+                type="text"
+                placeholder="Add custom tag..."
+                value={customTagInput}
+                onChange={(e) => setCustomTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && customTagInput.trim()) {
+                    if (!selectedTags.includes(customTagInput.trim())) {
+                      setSelectedTags([...selectedTags, customTagInput.trim()]);
+                    }
+                    setCustomTagInput("");
+                  }
+                }}
+                className="custom-tag-input"
+              />
+
+              <div className="selected-tags">
+                {selectedTags.map((tag) => (
+                  <span key={tag} className="selected-tag">
+                    {tag}{" "}
+                    <button
+                      onClick={() =>
+                        setSelectedTags(selectedTags.filter((t) => t !== tag))
+                      }
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         {uploadMessage && <p className="upload-message">{uploadMessage}</p>}
       </div>
 
       <div className="main-content">
         {files.length > 0 && <h3>Available Data:</h3>}
-        {files.map((file, index) => (
+
+        <input
+          type="text"
+          className="tag-search-input"
+          placeholder="Search by tag..."
+          value={activeFilter}
+          onChange={(e) => setActiveFilter(e.target.value)}
+        />
+
+        <div className="filter-tags">
+          <p>Filter by Tag:</p>
+          {defaultTags.map((tag) => (
+            <button
+              key={tag}
+              className={`filter-tag-button ${
+                activeFilter === tag ? "active" : ""
+              }`}
+              onClick={() => setActiveFilter(tag === activeFilter ? "" : tag)}
+            >
+              #{tag}
+            </button>
+          ))}
+
+          {activeFilter && (
+            <button
+              className="filter-tag-button clear-filter"
+              onClick={() => setActiveFilter("")}
+            >
+              ✕ Clear Filter
+            </button>
+          )}
+        </div>
+
+        {/* {filteredFiles.length > 0 && <h3>Available Data:</h3>} */}
+
+        {filteredFiles.length === 0 && (
+          <p className="no-results">No results found for #{activeFilter}</p>
+        )}
+
+        {filteredFiles.map((file, index) => (
           <div
             key={index}
             className={`file-preview ${file.highlighted ? "highlighted" : ""}`}
@@ -330,6 +440,16 @@ const CustomPage = () => {
             {file.caption && (
               <div className="caption-text">
                 <p>{file.caption}</p>
+              </div>
+            )}
+
+            {file.tags && file.tags.length > 0 && (
+              <div className="tags-display">
+                {file.tags.map((tag, i) => (
+                  <span key={i} className="tag-bubble">
+                    {tag}
+                  </span>
+                ))}
               </div>
             )}
 
@@ -363,7 +483,6 @@ const CustomPage = () => {
         ))}
         {uploadMessage && <p className="upload-message">{uploadMessage}</p>}
       </div>
-
       <div className="right-sidebar">
         <div className="profile-info-container">
           <div className="profile-pic-container">
